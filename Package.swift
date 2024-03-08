@@ -5,17 +5,27 @@ import PackageDescription
 
 let package = Package(
     name: "OAuth2Client",
+    platforms: [
+        .macOS(.v10_15),
+        .iOS(.v13),
+        .tvOS(.v13),
+        .watchOS(.v6),
+    ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
             name: "OAuth2Client",
             targets: ["OAuth2Client"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/star-s/HttpClient.git", branch: "main"),
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "OAuth2Client"),
+            name: "OAuth2Client",
+            dependencies: ["HttpClient"]),
         .testTarget(
             name: "OAuth2ClientTests",
             dependencies: ["OAuth2Client"]),
