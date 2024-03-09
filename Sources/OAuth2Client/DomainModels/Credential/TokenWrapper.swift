@@ -36,10 +36,7 @@ extension TokenWrapper: RefreshableCredential {
     }
 
     public func refresh<C: OAuth2Client>(with client: C) async throws -> TokenWrapper<T> {
-        guard let refreshToken = token.refreshToken else {
-            throw OAuth2ClientError.tokenIsNotRefreshable
-        }
-        let newToken: T = try await client.refreshToken(refreshToken, additionalParameters: .void)
+        let newToken: T = try await token.refresh(with: client)
         return TokenWrapper(token: newToken, createdAt: Date())
     }
 

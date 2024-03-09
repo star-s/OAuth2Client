@@ -10,9 +10,7 @@ import HttpClientUtilities
 
 public protocol CredentialProtocol: RequestAuthorizer {}
 
-public protocol RefreshableCredential: CredentialProtocol {
+public protocol RefreshableCredential: CredentialProtocol, Refreshable {
     var isExpired: Bool { get }
     var isRefreshable: Bool { get }
-
-    func refresh<C: OAuth2Client>(with client: C) async throws -> Self
 }
