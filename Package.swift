@@ -19,13 +19,18 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/star-s/HttpClient.git", branch: "main"),
+        .package(url: "https://github.com/groue/Semaphore.git", .upToNextMajor(from: "0.0.8")),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "OAuth2Client",
-            dependencies: ["HttpClient"]),
+            dependencies: [
+                .product(name: "HttpClient", package: "HttpClient"),
+                .product(name: "HttpClientUtilities", package: "HttpClient"),
+                .product(name: "Semaphore", package: "Semaphore"),
+            ]),
         .testTarget(
             name: "OAuth2ClientTests",
             dependencies: ["OAuth2Client"]),
