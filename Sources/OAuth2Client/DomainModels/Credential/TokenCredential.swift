@@ -28,7 +28,7 @@ public struct TokenCredential<T: AccessToken>: Codable {
 
 extension TokenCredential: RefreshableCredential {
     public var isExpired: Bool {
-        expiresAt >= Date()
+        expiresAt <= Date()
     }
 
     public var isRefreshable: Bool {
