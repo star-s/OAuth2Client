@@ -18,16 +18,7 @@ public extension CredentialProtocol where Self: AccessToken {
             guard let macToken = self as? MessageAuthenticationCodeToken else {
                 throw OAuth2ClientError.unsupportedTokenType
             }
-            let builder = MacAuthorizationBuilder(
-                request: request,
-                keyId: macToken.kid,
-                messageDigestAlgorithm: macToken.macAlgorithm,
-                timestamp: Date(),
-                sequenceNumber: nil,
-                accessToken: macToken.accessToken,
-                channelBinding: nil,
-                h: request.url?.host
-            )
+            let builder = try macToken.makeBuilder(for: request)
             request.headers.add(.authorization(builder.authorizationString))
         default:
             throw OAuth2ClientError.unsupportedTokenType
@@ -35,3 +26,5 @@ public extension CredentialProtocol where Self: AccessToken {
         return request
     }
 }
+
+extension AccessToken: CredentialProtocol {}

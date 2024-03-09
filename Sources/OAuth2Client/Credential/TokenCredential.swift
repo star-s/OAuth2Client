@@ -8,7 +8,7 @@
 import Foundation
 import HttpClient
 
-public struct AccessTokenCredential<T: AccessToken> {
+public struct TokenCredential<T: AccessToken>: Codable {
 
     public var expiresAt: Date {
         guard let expiresIn = token.expiresIn else {
@@ -26,15 +26,7 @@ public struct AccessTokenCredential<T: AccessToken> {
     }
 }
 
-extension AccessTokenCredential: RequestAuthorizer where T: RequestAuthorizer {
-    public func authorizer(request: URLRequest) async throws -> URLRequest {
-        try await token.authorizer(request: request)
-    }
-}
-
-extension AccessTokenCredential: CredentialProtocol where T: CredentialProtocol {}
-
-extension AccessTokenCredential: RefreshableCredential where T: CredentialProtocol {
+extension TokenCredential: RefreshableCredential {
     public var isExpired: Bool {
         expiresAt >= Date()
     }
@@ -43,12 +35,16 @@ extension AccessTokenCredential: RefreshableCredential where T: CredentialProtoc
         token.refreshToken != nil
     }
 
-    public func refresh<C: OAuth2Client>(with client: C) async throws -> AccessTokenCredential<T> {
+    public func refresh<C: OAuth2Client>(with client: C) async throws -> TokenCredential<T> {
         guard let refreshToken = token.refreshToken else {
             throw OAuth2ClientError.tokenIsNotRefreshable
         }
         let newToken: T = try await client.refreshToken(refreshToken, additionalParameters: .void)
-        return AccessTokenCredential(token: newToken, createdAt: Date())
+        return TokenCredential(token: newToken, createdAt: Date())
+    }
+
+    public func authorizer(request: URLRequest) async throws -> URLRequest {
+        try await token.authorizer(request: request)
     }
 }
 /*
