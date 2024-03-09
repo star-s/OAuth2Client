@@ -11,5 +11,5 @@ public enum OAuth2ClientError: Error {
     case wrongRedirectURL
     case stateMismatch
     case tokenIsNotRefreshable
-    case unknownTokenType
+    case unsupportedTokenType
 }

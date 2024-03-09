@@ -28,8 +28,7 @@ open class AccessToken: Codable {
         tokenType: AccessTokenType,
         refreshToken: String? = nil,
         expiresIn: TimeInterval? = nil,
-        scope: String? = nil,
-        createdAt: Date = Date()
+        scope: String? = nil
     ) {
         self.accessToken = accessToken
         self.tokenType = tokenType

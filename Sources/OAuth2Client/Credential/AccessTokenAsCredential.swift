@@ -15,27 +15,23 @@ public extension CredentialProtocol where Self: AccessToken {
         case .bearer:
             request.headers.add(.authorization(bearerToken: accessToken))
         case .mac:
-            // TODO: Implement mac authorization
-            let timestamp = String(Int64(Date().timeIntervalSince1970))
-            let nonce = String(UUID().uuidString.prefix(8))
-            assertionFailure("Not yet implemented")
-            break
+            guard let macToken = self as? MessageAuthenticationCodeToken else {
+                throw OAuth2ClientError.unsupportedTokenType
+            }
+            let builder = MacAuthorizationBuilder(
+                request: request,
+                keyId: macToken.kid,
+                messageDigestAlgorithm: macToken.macAlgorithm,
+                timestamp: Date(),
+                sequenceNumber: nil,
+                accessToken: macToken.accessToken,
+                channelBinding: nil,
+                h: request.url?.host
+            )
+            request.headers.add(.authorization(builder.authorizationString))
         default:
-            throw OAuth2ClientError.unknownTokenType
+            throw OAuth2ClientError.unsupportedTokenType
         }
         return request
-    }
-}
-
-public extension RefreshableCredential where Self: AccessToken {
-    var isRefreshable: Bool {
-        refreshToken != nil
-    }
-
-    func refresh<C: OAuth2Client>(with client: C) async throws -> Self {
-        guard let refreshToken else {
-            throw OAuth2ClientError.tokenIsNotRefreshable
-        }
-        return try await client.refreshToken(refreshToken, additionalParameters: .void)
     }
 }
