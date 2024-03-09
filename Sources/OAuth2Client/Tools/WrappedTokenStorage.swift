@@ -8,7 +8,7 @@
 import Foundation
 import Semaphore
 
-public actor TokenStorage<Token: AccessToken>: CredentialStorageProtocol {
+public actor WrappedTokenStorage<Token: AccessToken>: CredentialStorageProtocol {
 
     private enum StorageKeys: String, StorageKey {
         case token
@@ -17,7 +17,7 @@ public actor TokenStorage<Token: AccessToken>: CredentialStorageProtocol {
     private let backedStore: KeyedDataStorage<StorageKeys>
     private let semaphore = AsyncSemaphore(value: 1)
 
-    private lazy var _token: TokenWrapper<Token>? = fetchFromBackedStore() {
+    private lazy var _token: WrappedToken<Token>? = fetchFromBackedStore() {
         willSet {
             saveToBackedStorage(newValue)
         }
@@ -27,7 +27,7 @@ public actor TokenStorage<Token: AccessToken>: CredentialStorageProtocol {
         self.backedStore = storageFactory.storage(keyedBy: StorageKeys.self)
     }
 
-    public func get() async -> TokenWrapper<Token>? {
+    public func get() async -> WrappedToken<Token>? {
         await semaphore.wait()
         defer {
             semaphore.signal()
@@ -35,7 +35,7 @@ public actor TokenStorage<Token: AccessToken>: CredentialStorageProtocol {
         return _token
     }
 
-    public func modify<T>(_ closure: @escaping (inout TokenWrapper<Token>?) async throws -> T) async rethrows -> T {
+    public func modify<T>(_ closure: @escaping (inout WrappedToken<Token>?) async throws -> T) async rethrows -> T {
         await semaphore.wait()
         var token = _token
         defer {
@@ -45,7 +45,7 @@ public actor TokenStorage<Token: AccessToken>: CredentialStorageProtocol {
         return try await closure(&token)
     }
 
-    private func fetchFromBackedStore() -> TokenWrapper<Token>? {
+    private func fetchFromBackedStore() -> WrappedToken<Token>? {
         guard let data = backedStore.data(forKey: .token) else {
             return nil
         }
@@ -53,7 +53,7 @@ public actor TokenStorage<Token: AccessToken>: CredentialStorageProtocol {
         return try? decoder.decode(Credential.self, from: data)
     }
 
-    private func saveToBackedStorage(_ token: TokenWrapper<Token>?) {
+    private func saveToBackedStorage(_ token: WrappedToken<Token>?) {
         let encoder = PropertyListEncoder()
         encoder.outputFormat = .binary
         let data = try? encoder.encode(token)
