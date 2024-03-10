@@ -56,6 +56,26 @@ open class MessageAuthenticationCodeToken: AccessToken {
         try super.init(from: decoder)
     }
 
+    open override func encode(to encoder: any Encoder) throws {
+        try super.encode(to: encoder)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(kid, forKey: .kid)
+        try container.encode(macKey, forKey: .macKey)
+        try container.encode(macAlgorithm, forKey: .macAlgorithm)
+    }
+
+    // MARK: - CredentialProtocol
+
+    open override func authorizer(request: URLRequest) async throws -> URLRequest {
+        guard tokenType == .mac else {
+            return try await super.authorizer(request: request)
+        }
+        var request = request
+        let builder = try Self.makeBuilder(for: request, token: self)
+        request.headers.add(.authorization(builder.authorizationString))
+        return request
+    }
+
     open class func makeBuilder(for request: URLRequest, token: MessageAuthenticationCodeToken) throws -> AuthorizationStringBuilder {
         MacAuthorizationBuilder(
             request: request,
@@ -67,17 +87,5 @@ open class MessageAuthenticationCodeToken: AccessToken {
             channelBinding: nil,
             h: request.url?.host
         )
-    }
-
-    open override func encode(to encoder: any Encoder) throws {
-        try super.encode(to: encoder)
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(kid, forKey: .kid)
-        try container.encode(macKey, forKey: .macKey)
-        try container.encode(macAlgorithm, forKey: .macAlgorithm)
-    }
-
-    public func makeBuilder(for request: URLRequest) throws -> AuthorizationStringBuilder {
-        try Self.makeBuilder(for: request, token: self)
     }
 }

@@ -45,4 +45,27 @@ open class AccessToken: Codable {
         try container.encodeIfPresent(expiresIn, forKey: .expiresIn)
         try container.encodeIfPresent(scope, forKey: .scope)
     }
+
+    // MARK: - Refreshable
+
+    open func refresh<C: OAuth2Client>(with client: C) async throws -> Self {
+        guard let refreshToken else {
+            throw OAuth2ClientError.tokenIsNotRefreshable
+        }
+        return try await client.refreshToken(refreshToken, additionalParameters: .void)
+    }
+
+    // MARK: - CredentialProtocol
+
+    open func authorizer(request: URLRequest) async throws -> URLRequest {
+        guard tokenType == .bearer else {
+            throw OAuth2ClientError.unsupportedTokenType
+        }
+        var request = request
+        request.headers.add(.authorization(bearerToken: accessToken))
+        return request
+    }
 }
+
+extension AccessToken: Refreshable {}
+extension AccessToken: CredentialProtocol {}
