@@ -18,7 +18,7 @@ let package = Package(
             targets: ["OAuth2Client"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/star-s/HttpClient.git", branch: "main"),
+        .package(url: "https://github.com/star-s/HttpClient.git", from: "0.2.0"),
         .package(url: "https://github.com/groue/Semaphore.git", .upToNextMajor(from: "0.0.8")),
     ],
     targets: [
