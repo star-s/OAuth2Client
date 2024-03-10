@@ -23,7 +23,7 @@ open class MessageAuthenticationCodeToken: AccessToken {
 
     public init(
         accessToken: String,
-        tokenType: AccessTokenType,
+        tokenType: TokenType,
         refreshToken: String? = nil,
         expiresIn: TimeInterval? = nil,
         scope: String? = nil,

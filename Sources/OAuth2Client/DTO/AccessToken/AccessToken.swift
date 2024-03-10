@@ -18,14 +18,14 @@ open class AccessToken: Codable {
     }
 
 	public let accessToken: String
-	public let tokenType: AccessTokenType
+	public let tokenType: TokenType
 	public let refreshToken: String?
 	public let expiresIn: TimeInterval?
 	public let scope: String?
 
     public init(
         accessToken: String,
-        tokenType: AccessTokenType,
+        tokenType: TokenType,
         refreshToken: String? = nil,
         expiresIn: TimeInterval? = nil,
         scope: String? = nil
@@ -69,3 +69,25 @@ open class AccessToken: Codable {
 
 extension AccessToken: Refreshable {}
 extension AccessToken: CredentialProtocol {}
+
+extension AccessToken {
+    /// https://www.rfc-editor.org/rfc/rfc6749#section-7.1
+    public struct TokenType: RawRepresentable, ExpressibleByStringLiteral, Hashable, Codable {
+        public let rawValue: String
+
+        public init(rawValue: String) {
+            self.rawValue = rawValue.lowercased()
+        }
+
+        public init(stringLiteral value: StaticString) {
+            rawValue = String(describing: value).lowercased()
+        }
+
+        public init(from decoder: Decoder) throws {
+            rawValue = try decoder.singleValueContainer().decode(String.self).lowercased()
+        }
+
+        public static let bearer: TokenType = "bearer"
+        public static let mac: TokenType    = "mac"
+    }
+}
