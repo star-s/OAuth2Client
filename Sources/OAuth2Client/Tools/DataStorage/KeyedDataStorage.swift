@@ -12,7 +12,7 @@ public struct KeyedDataStorage<Key: StorageKey> : KeyedDataStorageProtocol {
     private let gettter: (Key) -> Data?
     private let setter: (Data?, Key) -> Void
 
-    init(
+    public init(
         gettter: @escaping (Key) -> Data?,
         setter: @escaping (Data?, Key) -> Void
     ) {
