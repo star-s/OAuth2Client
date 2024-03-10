@@ -11,11 +11,6 @@ import Foundation
 /// https://datatracker.ietf.org/doc/draft-ietf-oauth-v2-http-mac
 open class MessageAuthenticationCodeToken: AccessToken {
 
-    public enum Algorithm: String, Codable {
-        case hmacSha1 = "hmac-sha-1"
-        case hmacSha256 = "hmac-sha-256"
-    }
-
     private enum CodingKeys: String, CodingKey {
         case kid = "kid"
         case macKey = "mac_key"
@@ -87,5 +82,26 @@ open class MessageAuthenticationCodeToken: AccessToken {
             channelBinding: nil,
             h: request.url?.host
         )
+    }
+}
+
+extension MessageAuthenticationCodeToken {
+    public struct Algorithm: RawRepresentable, ExpressibleByStringLiteral, Hashable, Codable {
+        public let rawValue: String
+
+        public init(rawValue: String) {
+            self.rawValue = rawValue.lowercased()
+        }
+
+        public init(stringLiteral value: StaticString) {
+            rawValue = String(describing: value).lowercased()
+        }
+
+        public init(from decoder: Decoder) throws {
+            rawValue = try decoder.singleValueContainer().decode(String.self).lowercased()
+        }
+
+        public static let hmacSha1: Algorithm   = "hmac-sha-1"
+        public static let hmacSha256: Algorithm = "hmac-sha-256"
     }
 }
