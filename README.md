@@ -2,6 +2,8 @@
 
 Library for building an OAuth2 HTTP Client.
 
+Example of using [HttpClient](https://github.com/star-s/HttpClient.git)
+
 ## Installation
 
 ### Swift Package Manager
